@@ -1,4 +1,4 @@
-# Learning2Search_BioMeds
+# Learning2Search_BioEnts
 Named Entity Recognition on Biomedical Journals, using Vowpal Wabbit's Learning2Search  
   
    
@@ -7,15 +7,15 @@ Named Entity Recognition on Biomedical Journals, using Vowpal Wabbit's Learning2
   
 [Learning2Search](https://github.com/VowpalWabbit/vowpal_wabbit/wiki/Learning-to-Search-Sub-System) is Vowpal Wabbit's most mysterious technique. This subsystem promises a fast and easy way to solve structured prediction problems, such as dependancy parsing and entity recognition problems, through joint prediction with joint loss, a powerful approach to any text analysis.  
   
-<img src="https://github.com/janniec/Learning2Search_BioMeds/blob/master/images/joint_prediction.png" alt="Dimensions" align="middle" height=600px>   
+<img src="https://github.com/janniec/Learning2Search_BioMeds/blob/master/images/joint_prediction.png" alt="Dimensions" align="middle" height=400px>   
    
 Learning2Search accomplishes this through three components in its algorithm, (1) a roll-in policy that determins how the model will train, (2) one-step deviations to make sequences of preditions, and (3) a roll-out policy that scores the sequences of predictions.  
   
+<img src="https://github.com/janniec/Learning2Search_BioMeds/blob/master/images/rollinrollout.jpg" alt="Dimensions" align="middle" height=400px>  
+  
 The available policies are 'ref', which is akin to supervised learning, 'learn', which is akin to imitation learning, and 'mix' which is a 50/50 mixture of the 2 policies. Rolling-in with 'learn' is recommended, as 'mix' is not available as a rollin policy, and 'ref' gives inconsistent results, especially when there are sequences in the testing set not found in the training set. Assuming the roll-in policy is set to 'learn', rolling-out with 'learn' is akin to reinforcement learning and not recommended. Rolling-out with 'ref' may not converge on a local optimal score. Rolling in with 'learn' and rolling-out with 'mix' has shown the most consistent good performance. For more information, please [read this](https://arxiv.org/pdf/1502.02206.pdf) and [watch this](https://www.youtube.com/watch?v=ZMhO1FO_j0o).  
   
-<img src="https://github.com/janniec/Learning2Search_BioMeds/blob/master/images/rollinrollout.jpg" alt="Dimensions" align="middle" height=600px>  
-   
-Depsite the wealth of information about the systems performance and algorithm, documentation on actually how to implement Learning2Search is minimal or outdated. Through reasearch, trial & error, and sheer grit, I have been able to piece together enough information to build custom entity recogintion models.  
+Depsite the wealth of information about the subsystem's performance and underlying algorithm, documentation on how to actually implement Learning2Search is minimal or outdated. Through reasearch, trial & error, and sheer grit, I have been able to piece together enough information to build custom entity recogintion models.  
   
   
 ## Data  
