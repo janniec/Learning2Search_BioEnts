@@ -6,6 +6,12 @@ nlp = spacy.load('en')
 
 
 def split_text_to_match_tokens(old_dict):
+    ''' 
+    Processes the paragraph with SpaCy and returns Spacy Tokens. 
+    Please note that that SpaCy breaks down the paragraphs even further than the dataset broke down the words. For example: in the dataset, 1 line contained "high-dose". SpaCy tokenized this as ["high", "-", "dose"]. As such, the data dictionary has been reorganized to match the SpaCy breakdown. 
+    IN: dictionary of doc_ids: {'doc': paragraph of words, 'words': dictionary of {'word_index': {'text': word, 'tag': BIO tag}}} 
+    OUT: dictionary of doc_ids: {'doc': paragraph of words, 'words': dictionary of {'word_index': {'text': word, 'tag': BIO tag, 'token': SpaCy token}}} 
+    '''
     new_dict = {}
     for doc_id in old_dict.keys():
         new_dict[doc_id]={'doc': old_dict[doc_id]['doc'], 'words':{}}

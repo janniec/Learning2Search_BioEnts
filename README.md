@@ -1,13 +1,13 @@
 # Learning2Search_BioEnts
-Named Entity Recognition on Biomedical Journals, using Vowpal Wabbit's Learning2Search  
+Named Entity Recognition on Biomedical Journals, using Vowpal Wabbit's Learning2Search.  
   
-   
+  
 ## Vowpal Wabbit & Learning2Search  
 [Vowpal Wabbit](https://github.com/VowpalWabbit/vowpal_wabbit) is a fast and flexible open source system sponsored by Microsft Research. While capable of  many techniques, such as classification, regression, topic modeling or matrix factorization, at its core the system is based on sparse gradient descent, making it intrisically fast and easy to optimize ... once you figured out how to use it.  
   
 [Learning2Search](https://github.com/VowpalWabbit/vowpal_wabbit/wiki/Learning-to-Search-Sub-System) is Vowpal Wabbit's most mysterious technique. This subsystem promises a fast and easy way to solve structured prediction problems, such as dependancy parsing and entity recognition problems, through joint prediction with joint loss, a powerful approach to any text analysis.  
   
-<img src="https://github.com/janniec/Learning2Search_BioMeds/blob/master/images/joint_prediction.png" alt="Dimensions" align="middle" height=400px>   
+<img src="https://github.com/janniec/Learning2Search_BioMeds/blob/master/images/joint_prediction.png" alt="Dimensions" align="middle" height=300px>   
    
 Learning2Search accomplishes this through three components in its algorithm, (1) a roll-in policy that determins how the model will train, (2) one-step deviations to make sequences of preditions, and (3) a roll-out policy that scores the sequences of predictions.  
   
@@ -21,7 +21,7 @@ Depsite the wealth of information about the subsystem's performance and underlyi
 ## Data  
 Data for this project came from the [Genia version 3.02 corpus](http://www.nactem.ac.uk/tsujii/GENIA/ERtask/report.html) which contains abstracts found on MEDLINE. The designated training set contained 2000 abstracts, while the designated testing set contained 404 abstracts.  All abstracts were hand-annotated, by the JNLPBA Project, according to 5 classes based on chemical classifications -- protein, cell-type, cell-line, RNA and DNA.    
    
-Because the performance of NER models are so dependant on the cleanliness and consistency of the selected texts and annotations, it is important to note the average performance of various models on the dataset.  In 2004, this dataset was created by the JNLPBA project and shared among eight participants to test the data on various systems, which included Support Vector Machines, several Markov Models, and Conditional Random Field. Below is the table of the mean performances across all 5 classes by each of the participants. For more information, please see the [Introduction to the Bio-Entity Recognition Task at JNLPBA](http://www.nactem.ac.uk/tsujii/GENIA/ERtask/shared_task_intro.pdf).   
+Because the performance of NER models are so dependant on the cleanliness and consistency of the selected texts and annotations within the dataset, it is important to note the average performance of various models on the dataset.  In 2004, this dataset was created by the JNLPBA project and shared among eight participants to test the data on various systems, which included Support Vector Machines, several Markov Models, and Conditional Random Field. Below is the table of the mean performances across all 5 classes by each of the participants. For more information, please see the [Introduction to the Bio-Entity Recognition Task at JNLPBA](http://www.nactem.ac.uk/tsujii/GENIA/ERtask/shared_task_intro.pdf).   
    
 |           	| Recall 	| Precision 	| F1 Score 	|
 |-----------	|--------	|-----------	|----------	|
@@ -35,7 +35,7 @@ Because the performance of NER models are so dependant on the cleanliness and co
 | Lee       	| 50.8   	| 47.6      	| 49.1     	|
 | Base Line 	| 52.6   	| 43.6      	| 47.7     	|  
    
-In 2018, the same dataset was used in a Deep Exhaustive Model ('DEM') utilizing long-short-term memory neural nets. Below is the table of DEM's categorical performance on the GENIA testing set. For more information, please see the [Deep Exhaustive Model for Nested Named Entity Recognition](https://www.aclweb.org/anthology/D18-1309).  
+In 2018, the same dataset was used for a Deep Exhaustive Model  utilizing a long-short-term memory neural net ('DEM LSTM'). Below is the table of DEM LSTM's categorical performance on the GENIA testing set. For more information, please see the [Deep Exhaustive Model for Nested Named Entity Recognition](https://www.aclweb.org/anthology/D18-1309).  
   
 | Label     	| Recall 	| Precision 	| F1Score 	|
 |-----------	|--------	|-----------	|---------	|
@@ -51,17 +51,37 @@ In 2018, the same dataset was used in a Deep Exhaustive Model ('DEM') utilizing 
   * SpaCy
   * SkLearn
   
+
+## Pipeline
+1. Collect lines of words and tags from the GENIA datasets.  
+2. Group the words back together into text structure.  
+3. Process the texts, utilizing SpaCy, to create features. 
+4. Generate txt files with designated train data & test data.  
+5. Train Vowpal Wabbit models on train file & predict on test file.  
+6. Evaluate predictions utilizing skLearn.  
+  
+* In order to find the best parameters to fit the models on the data, please use my ExperimentSweep module.  
+1. Provide ranges of each paramaters.  
+2. Start DateTime timer.  
+3. Create an experiment dataframe to track combination of parameters and scores.  
+4. Print status updates.  
+5. Train Vowpal Wabbit models on train file & predict on test file.   
+6. Evaluate predictions utilizing skLearn.   
+7. Log in dataframe.  
+8. End DateTime timer and prints duration. 
+9. Output dataframe sorted on descending F1 score.  
+  
   
 ## Models  
-Learning2Search model are inherently multiclass, predicting[IOB tags](https://en.wikipedia.org/wiki/Inside%E2%80%93outside%E2%80%93beginning_(tagging)), the inside, outside, and beginning of each entity. For example, each non-entity word is tagged as "outside" with the 1 label. The first or only word of an entity is tagged as "beginning" with the 2 label (or even numbered label if the model is predicting multiple entities). Finally, finally the other words within the entity are tagged as "inside" with the 3 label (or odd numbered label if the model is predicting multiple entities).   
+Learning2Search models are inherently multiclass, predicting [IOB tags](https://en.wikipedia.org/wiki/Inside%E2%80%93outside%E2%80%93beginning_(tagging)), the inside, outside, and beginning of each entity. For example, each non-entity word is tagged as "outside" with the 1 label. The first or only word of an entity is tagged as "beginning" with the 2 label (or even numbered label if the model is predicting multiple entities). Finally, the other words within the entity are tagged as "inside" with the 3 label (or odd numbered label if the model is predicting multiple entities).   
    
-- Approach 1: a single model to predict 5 entities, 11 classes. A model trained on only 2000 abstracts was insufficient to predict so many classes. See the evaluation table below.  Either the pattern of text between the entities needed to be more formulaic or we needed more data to predict the relationship among the classes.   
+- Approach 1: a single model to predict 5 entities/ 11 classes. A model trained on only 2000 abstracts was insufficient to predict so many classes. See the evaluation table below.  Either the pattern of text between the entities needed to be more formulaic or we needed more data to predict the relationship among the classes.   
   
 | Label     	| Recall 	| Precision 	| F1Score 	|
 |-----------	|--------	|-----------	|---------	|
 | All Classes  	| 48.8   	| 71.3      	| 53.7    	|  
   
-- Approach 2: five separate models, one for each entity, 3 classes. This method proved more successful. Categorical performance of each model is shown in the table below, along with the F1 scores of the recent DEM LSTM model as a bench mark.  
+- Approach 2: five separate models, one for each entity/ 3 classes. This method proved more successful. Categorical performance of each model is shown in the table below, along with the F1 scores of the recent DEM LSTM model as a bench mark.  
    
 | Label     	| Recall 	| Precision 	| F1Score 	| DEM's F1s	|
 |-----------	|--------	|-----------	|---------	|---------	|
@@ -80,4 +100,4 @@ In addition, the collective performance across all the classes has improved beyo
     
     
 ## Next Steps  
-Legacy versions of Learning2Search apparently had the capability to perform [Entity Relation Recognition](https://github.com/VowpalWabbit/vowpal_wabbit/tree/master/demo/entityrelation). Given that models have been separated to train and predict on 1 entity at a time. There is an opportunity to use the predictions generated from the most successful model, cell-type, as entity-relation features in weaker models, such as protein.  
+Legacy versions of Learning2Search apparently had the capability to perform [Entity Relation Recognition](https://github.com/VowpalWabbit/vowpal_wabbit/tree/master/demo/entityrelation). Given that models have been separated to train and predict on 1 entity at a time. There is an opportunity to use the predictions generated from the more successful models, such as cell-type, as entity-relation features in weaker models, such as protein, to boost performance.  

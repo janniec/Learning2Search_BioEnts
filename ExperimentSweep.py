@@ -8,39 +8,31 @@ import vwCommands as vwc
 import evaluatePredictions as ep
 
 
-def make_addresses(train_address):
-    address_path = train_address.split('/')[0]
-    file_call = train_address.split('/')[-1].split('_')[0]
-    
-    test_address = address_path+'/%s_test.txt' % file_call
-    model_address = address_path+'/%s_model.model' % file_call
-    pred_address = address_path+'/%s_pred.txt' % file_call
-    raw_address = address_path+'/%s_raw.txt' % file_call
-    return test_address, model_address, pred_address, raw_address
-
-
-def single_test(train_address, num_labels, \
-                  rollin, rollout, \
-                  epochs, lr, affix, history, neighbor):
-    test_address, model_address, pred_address, raw_address = make_addresses(train_address)
-    
-    vw_train = vwc.train_command(train_address, model_address, num_labels,\
-                  rollin, rollout, \
-                  epochs, lr, affix, history, neighbor)
-    os.system(vw_train)
-#     ! eval {vw_train}
-    vw_test = vwc.test_command(test_address, model_address, pred_address, raw_address)
-    os.system(vw_test)
-#     ! eval {vw_test}
-    
-    label_set = [str(i) for i in list(range(1, num_labels+1))]
-    precision, recall, fscore, support = ep.evaluate(test_address, pred_address, label_set)
-    
-    return fscore, precision, recall
-
-
 def experiment_sweep(train_address, num_labels, rollin_list, rollout_list,\
                      epoch_list, lr_list, affix_list, history_list, neighbor_list):
+    '''
+    To find the best parameters for training data:
+    1. Provide ranges of each paramaters.  
+    2. Start DateTime timer.  
+    3. Create an experiment dataframe to track combination of parameters and scores.  
+    4. Print status updates.  
+    5. Train Vowpal Wabbit models on train file & predict on test file.   
+    6. Evaluate predictions utilizing skLearn.   
+    7. Log in dataframe.  
+    8. End DateTime timer and prints duration.  
+    9. Output dataframe sorted on descending F1 score. 
+    IN:
+    train_address - where to import the training data from.
+    num_labels - number of classes in the dataset.
+    rollin_list - 'learn' or 'ref'.
+    rollout_list - 'learn', 'mix', 'ref', 'none'.
+    epoch_list - range of passes over training data.
+    lr_list - range of step sizes to convergance in stochastic gradient descent.
+    affix_list - range of prefixes/suffixes of features to train on.
+    history_list - range of previous features to train on.
+    neighbor_list - reange of neighboring predictions to train on.
+    OUT: Experiment dataframe sorted on descending F1 Scores
+    '''
     starttime = datetime.datetime.now()
     print('Start:\t', starttime)  
     
@@ -68,7 +60,7 @@ def experiment_sweep(train_address, num_labels, rollin_list, rollout_list,\
             experiment_log.loc[index, 'history'] = combo[5]
             experiment_log.loc[index, 'neighbor'] = combo[6]
             
-            fscore, precision, recall = single_test(train_address, num_labels, \
+            fscore, precision, recall = vwc.single_experiment(train_address, num_labels, \
                   combo[0], combo[1], \
                   combo[2], combo[3], combo[4], combo[5], combo[6])
 
@@ -82,4 +74,4 @@ def experiment_sweep(train_address, num_labels, rollin_list, rollout_list,\
     print('End:\t', endtime)
     print('Duration:\t', endtime-starttime)
     
-    return experiment_log            
+    return experiment_log.sort_values(by='fscore', ascending=False).reset_index(drop=True)            

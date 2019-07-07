@@ -3,6 +3,10 @@ import pandas as pd
 from sklearn.metrics import precision_recall_fscore_support
 
 def collect_labels(test_address):
+    '''
+    Collects actual labels from file at test_address.
+    Returns list of lists of labels for each word in a sentence.
+    '''
     with open(test_address) as f:
         contents = f.readlines()
     all_labels = []
@@ -17,6 +21,10 @@ def collect_labels(test_address):
     return all_labels
 
 def collect_predictions(pred_address):
+    '''
+    Collects predicted labels from file at pred_address.
+    Returns list of lists of predictions for each word in a sentence.
+    '''
     with open(pred_address) as f:
         contents = f.readlines()
     all_preds = []
@@ -26,7 +34,13 @@ def collect_predictions(pred_address):
 
 
 def evaluate(test_address, pred_address, label_set):
-
+    '''
+    IN:
+    test_address - test file 
+    pred_address - file of predictions
+    label_set - set of labels to be tallied in evaluation
+    OUT: scores from evaluation by SkLearn
+    '''
     all_labels = collect_labels(test_address)   
     all_preds = collect_predictions(pred_address)
     
