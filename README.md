@@ -60,16 +60,16 @@ In 2018, the same dataset was used for a Deep Exhaustive Model  utilizing a long
 5. Train Vowpal Wabbit models on train file & predict on test file.  
 6. Evaluate predictions utilizing skLearn.  
   
-* In order to find the best parameters to fit the models on the data, please use my ExperimentSweep module.  
-1. Provide ranges of each paramaters.  
-2. Start DateTime timer.  
-3. Create an experiment dataframe to track combination of parameters and scores.  
-4. Print status updates.  
-5. Train Vowpal Wabbit models on train file & predict on test file.   
-6. Evaluate predictions utilizing skLearn.   
-7. Log in dataframe.  
-8. End DateTime timer and prints duration. 
-9. Output dataframe sorted on descending F1 score.  
+* In order to find the best parameters to fit the models on the data, please use the ExperimentSweep module.  
+    1. Provide ranges of each paramaters.  
+    2. Start DateTime timer.  
+    3. Create an experiment dataframe to track combination of parameters and scores.  
+    4. Print status updates.  
+    5. Train Vowpal Wabbit models on train file & predict on test file.   
+    6. Evaluate predictions utilizing skLearn.   
+    7. Log in dataframe.  
+    8. End DateTime timer and prints duration.  
+    9. Output dataframe sorted on descending F1 score.  
   
   
 ## Models  
