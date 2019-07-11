@@ -77,14 +77,14 @@ def make_vw_txt(filename, list_of_doc_ids, data_dict, IOB_dict = {'O': 1}):
     IN: 
     filename - name of txt file that will be generated
     list_of_doc_ids - list of doc ids in train set or test set 
-    data_dict - dictionary of doc_ids: {'doc': paragraph of words, 'words': dictionary of {'word_index': {'text': word, 'tag': BIO tag, 'token': SpaCy token}}}
+    data_dict - dictionary of doc_ids: {{'word_index': {'text': word, 'tag': BIO tag, 'token': SpaCy token}}}
     IOB_dict - You an provide the IOB_dict from the train txt file so that the test txt file will have matching labels. Also useful if you want to train/text on 1 entity at a time. Or you can just let the function generate a new IOB_dict.
     OUT: a IOB_dict so you can keep track of the entity tags to the number labels. 
     '''
     f = open(filename, 'w')
     for doc_id in list_of_doc_ids:
         f.write('1 | -DOCSTART- | -X-\n')
-        words = data_dict[doc_id]['words']
+        words = data_dict[doc_id]
         for index, words_i in enumerate(words.keys()):
             tag = words[words_i]['tag']
             text = words[words_i]['text']

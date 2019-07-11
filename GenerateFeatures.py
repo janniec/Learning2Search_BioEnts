@@ -5,35 +5,38 @@ nlp = spacy.load('en')
 
 
 
-def split_text_to_match_tokens(old_dict):
+def grab_tagged_tokened_text_from_lines(dict_of_txtlines):
+
     ''' 
-    Processes the paragraph with SpaCy and returns Spacy Tokens. 
+    For each line within each dictionary value, group words back into a paragraph structure and processes the paragraph with SpaCy and returns Spacy Tokens. 
     Please note that that SpaCy breaks down the paragraphs even further than the dataset broke down the words. For example: in the dataset, 1 line contained "high-dose". SpaCy tokenized this as ["high", "-", "dose"]. As such, the data dictionary has been reorganized to match the SpaCy breakdown. 
-    IN: dictionary of doc_ids: {'doc': paragraph of words, 'words': dictionary of {'word_index': {'text': word, 'tag': BIO tag}}} 
-    OUT: dictionary of doc_ids: {'doc': paragraph of words, 'words': dictionary of {'word_index': {'text': word, 'tag': BIO tag, 'token': SpaCy token}}} 
+    IN: dictionary of doc_ids: list of lines
+    OUT: dictionary of doc_ids: {{'word_index': {'text': word, 'tag': BIO tag, 'token': SpaCy token}}} 
     '''
-    new_dict = {}
-    for doc_id in old_dict.keys():
-        new_dict[doc_id]={'doc': old_dict[doc_id]['doc'], 'words':{}}
-#         print('****', doc_id, '*****')
-        words = old_dict[doc_id]['words']
-        spacy_tokens = nlp(old_dict[doc_id]['doc'])
+    data = {}
+    for doc_id in dict_of_txtlines.keys():
+        paragraph = ' '.join([bio.split('\t')[0]\
+                                     for bio in dict_of_txtlines[doc_id]])
+        spacy_tokens = nlp(paragraph)
+        words = [{'text': line.split('\t')[0], 'tag': line.split('\t')[-1][:-1]}\
+                 for index, line in enumerate(dict_of_txtlines[doc_id])]
+        data[doc_id]={}
         offset = 0
-        for word_i in words.keys():
+        for word_i, word_dict in enumerate(words):
             index = word_i + offset
-            tag = words[word_i]['tag'] 
-            word = words[word_i]['text']
+            tag = word_dict['tag'] 
+            word = word_dict['text']
             token = spacy_tokens[index]  
-            new_dict[doc_id]['words'][index]={}
+            data[doc_id][index]={}
             if len(word.strip()) > len(token.text.strip()):
-                word = words[word_i]['text'].strip()[:len(token.text.strip())]
+                word = word_dict['text'].strip()[:len(token.text.strip())]
 
-                new_dict[doc_id]['words'][index] = {'token': token, 'text': word, 'tag': tag}
+                data[doc_id][index] = {'token': token, 'text': word, 'tag': tag}
 
-                remaining_word = words[word_i]['text'].strip()[len(token.text.strip()):]
+                remaining_word = word_dict['text'].strip()[len(token.text.strip()):]
                 offset +=1
                 index = word_i + offset
-                new_dict[doc_id]['words'][index]={}
+                data[doc_id][index]={}
                 token = spacy_tokens[index] 
                 if tag.startswith('B'):
                     tag_type = tag.split('-')[-1]
@@ -41,19 +44,19 @@ def split_text_to_match_tokens(old_dict):
                 while len(remaining_word.strip()) > len(token.text.strip()):
                     word = remaining_word.strip()[:len(token.text.strip())]
 
-                    new_dict[doc_id]['words'][index] = {'token': token, 'text': word, 'tag': tag}
+                    data[doc_id][index] = {'token': token, 'text': word, 'tag': tag}
 
                     remaining_word = remaining_word.strip()[len(token.text.strip()):]
                     offset +=1
                     index = word_i + offset
-                    new_dict[doc_id]['words'][index]={}
+                    data[doc_id][index]={}
                     token = spacy_tokens[index] 
                 if len(remaining_word.strip()) == len(token.text.strip()):
                     word = remaining_word.strip()
 
-                    new_dict[doc_id]['words'][index] = {'token': token, 'text': word, 'tag': tag}
+                    data[doc_id][index] = {'token': token, 'text': word, 'tag': tag}
 
             else:
 
-                new_dict[doc_id]['words'][index] = {'token': token, 'text': word, 'tag': tag} 
-    return new_dict
+                data[doc_id][index] = {'token': token, 'text': word, 'tag': tag} 
+    return data

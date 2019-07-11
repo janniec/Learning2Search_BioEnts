@@ -29,16 +29,3 @@ def collect_lines_from_file(filename):
     return dict_of_txtlines
     
     
-def grab_words_tags_from_lines(dict_of_txtlines):
-    '''
-    For each line within each dictionary value, group words back into a paragraph structure and assign to 'doc', assign word to 'text' and BIO tag to 'tag'.
-    IN: dictionary of doc_ids: list of lines
-    OUT: dictionary of doc_ids: {'doc': paragraph of words, 'words': dictionary of {'word_index': {'text': word, 'tag': BIO tag}}} 
-    '''
-    data = {}
-    for doc_id in dict_of_txtlines.keys():
-        lines = dict_of_txtlines[doc_id]
-        doc = ' '.join([bio.split('\t')[0] for bio in lines])
-        words = {index :{'text': line.split('\t')[0], 'tag': line.split('\t')[-1][:-1]} for index, line in enumerate(lines)}
-        data[doc_id] = {'doc': doc, 'words': words}
-    return data

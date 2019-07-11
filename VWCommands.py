@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
-import evaluatePredictions as ep
+import os
+import EvaluatePredictions as ep
 
 
 def train_command(train_address, model_address, num_labels, \
