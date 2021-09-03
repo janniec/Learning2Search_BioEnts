@@ -1,5 +1,5 @@
-# Learning2Search_BioEnts
-Named Entity Recognition on Biomedical Journals, using Vowpal Wabbit's Learning2Search.  
+# Learning2Search_BioEntities
+Named Entity Recognition on biomedical journals, using Vowpal Wabbit's Learning2Search subsystem.  
   
   
 ## Vowpal Wabbit & Learning2Search  
